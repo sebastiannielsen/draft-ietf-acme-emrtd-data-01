@@ -194,10 +194,10 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
        "url": "https://example.com/acme/chall/Rg5dV14Gh1Q"
      }),
      "payload": base64url({"sod": <Security Data Object, b64 encoded>,
-                           "dg1": <eMTRD DG1 file,  b64 encoded>,
-                           "dg2": <eMTRD DG2 file,  b64 encoded>,
+                           "dg1": <eMRTD DG1 file,  b64 encoded>,
+                           "dg2": <eMRTD DG2 file,  b64 encoded>,
                            . . .,
-                           "dgx": <eMTRD DGx file,  b64 encoded>}),
+                           "dgx": <eMRTD DGx file,  b64 encoded>}),
      "signature": "Q1bURgJoEslbD1c5...3pYdSMLio57mQNN4"
    }
 
