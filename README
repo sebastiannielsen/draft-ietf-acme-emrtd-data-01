@@ -277,6 +277,12 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
    in a privacy-friendly way, in accordance with a privacy policy
    enacted by the CA.
 
+   The resubmission of the eMRTD data for each validation session,
+   makes the protocol very privacy-friendly, as the CA does not need
+   to store any sensitive data to faciliate renewals other than the
+   passport serial number, the user's full name, and the ACME
+   account URI linked with biometric authentication.
+
 6.  IANA Considerations
 
 6.1.  ACME Validation Method
