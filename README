@@ -175,7 +175,7 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
 
    2.  Challenge Response - Respond to the ACME server with an object
        contaning at least the SOD file, DG1 file, and DG2 file from
-       the eMTRD document, but it SHOULD send all DG objects that
+       the eMRTD document, but it SHOULD send all DG objects that
        is accessible (not requiring EAC) unless the user has configured
        the ACME client to blacklist certain DG objects as specified in
        "Privacy Considerations".
@@ -242,10 +242,10 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
 3.5.  Implementation Considerations
 
    Its important to consider that this method does not actually
-   require the eMTRD document to be on the reader. If the owner
+   require the eMRTD document to be on the reader. If the owner
    wishes to make use of the document, the owner can for example
    copy the data to a file, or store it in a virtual NFC reader
-   The challenge method proves knowledge of the eMTRD data,
+   The challenge method proves knowledge of the eMRTD data,
    combined with binding to account URI for any biometric
    authentication or other out-of-band verifications like
    email, phone or mailed-letter verification to ensure
