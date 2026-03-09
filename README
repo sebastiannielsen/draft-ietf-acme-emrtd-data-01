@@ -1,0 +1,341 @@
+draft-ietf-acme-emrtd-data-01
+Automated Certificate Management Environment     Sebastian Robin Nielsen
+Internet-Draft
+Intended status: Standards Track
+Expires: XX XXXX XXXX
+
+
+  Automated Certificate Management Environment (ACME) eMRTD verification
+                  draft-ietf-acme-emrtd-data-01
+
+Abstract
+
+   This document outlines a new eMRTD-based challenge type for the ACME
+   protocol that enables a ACME client to perform automated IV
+   validation of a individual's identity, by allowing upload of
+   passport data or ID card data. This is performed by connecting
+   a USB NFC reader (like ACR122U or ACR1552U) to the computer running
+   the ACME client, and placing a passport or ID card on top of the
+   reader, and then the user enters the CAN or vital data to enable
+   access to the eMRTD from the NFC reader, inside ACME client.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://github.com/sebastiannielsen/draft-ietf-acme-emrtd-data-01.
+   Status information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-ietf-acme-emrtd-data-01/.
+
+   Discussion of this document takes place on the WG Working Group
+   mailing list (mailto:acme@ietf.org), which is archived at
+   https://datatracker.ietf.org/wg/acme/about/.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/acme/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/sebastiannielsen/draft-ietf-acme-emrtd-data-01.
+
+Status of This Memo
+
+?????????
+
+
+Sebastian Robin Nielsen    Expires XX XXX XX                  [Page 1]
+Internet-Draft             ACME-EMRTD-DATA-01               March 2026
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on XX XXX XX.
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
+   2.  Conventions and Definitions . . . . . . . . . . . . . . . . .   3
+   3.  EMRTD-DATA-01 Challenge . . . . . . . . . . . . . . . . . . .   4
+     3.1.  Challenge Definition  . . . . . . . . . . . . . . . . . .   4
+     3.2.  Challenge Fulfillment . . . . . . . . . . . . . . . . . .   4
+     3.3.  Server Validation . . . . . . . . . . . . . . . . . . . .   5
+     3.4.  Errors  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     3.5.  Implementation Considerations . . . . . . . . . . . . . .   6
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .   6
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+     6.1.  ACME Validation Method  . . . . . . . . . . . . . . . . .   7
+     6.2.  ACME Identifier Type  . . . . . . . . . . . . . . . . . .   7
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .   7
+
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 2]
+Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
+
+1.  Introduction
+
+   Today ACME only supports verification of digital identies, like
+   domain names, email adresses, phone numbers, devices, IPs and
+   similiar.
+
+   This limitation becomes particularly problematic when a certificate
+   is to be linked to a real identity, in this case a individual, when
+   an S/MIME certificate, authentication certificate, document signing
+   certificate or similiar is to be issued to a identified individual.
+
+   Nowadays, this is done by an out-of-band authentication channel.
+   This document specifies a new challenge type: emrtd-data-01, which
+   adresses these needs. The emrtd-data-01 challenge allows the ACME
+   client to upload the signed content of a ID card or passport read
+   by NFC to the ACME server. This allows the ACME server to perform
+   verification of a individual's identity, securely in a unattended
+   way, while the ID card or passport is still present on the NFC
+   reader.
+
+   The challenge is designed to be flexible regarding the timing of
+   identity verification. A CA might require a biometric scan to be
+   performed after the challenge is initiated, using the
+   "urn:ietf:params:acme:error:externalVerificationRequired" mechanism
+   described in RFC 8555. Alternatively, a CA may link the eMRTD data
+   to a pre-existing biometric verification previously performed
+   through an out-of-band process, such as a web portal, allowing
+   for a fully automated challenge completion if a match is found.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 3]
+Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
+
+3. EMRTD-DATA-01 Challenge
+
+   The emrtd-data-01 challenge allows an ACME client to prove the
+   identity of a subject by submitting the electronic data contained
+   within an eMRTD (electronic Machine Readable Travel Document) NFC
+   chip, as defined in ICAO Doc 9303. The ACME server validates the
+   document's authenticity by verifying that the SOD (Document Security
+   Object) contains valid hashes of the submitted DG (Data Group)
+   objects and that the SOD itself carries a valid digital signature.
+   This signature must be traceable through a Document Signer (DS)
+   certificate to a trusted Country Signing Certification Authority
+   (CSCA) root, as defined by the CA/BR.
+
+3.1.  Challenge Definition
+
+   The challenge object contains the following fields:
+
+   *  type (required, string): The string "emrtd-data-01".
+
+   Example challenge object:
+
+   {
+       "type": "emrtd-data-01",
+       "url": "https://example.com/acme/chall/i00MGYwLWIx",
+       "status": "pending"
+   }
+
+3.2.  Challenge Fulfillment
+
+   To fulfill this challenge, a client performs the following steps:
+
+   1.  Passport reading - Read the passport using a NFC reader connected
+       to the machine using the ACME client, or use another method to
+       acquire the passport data, for example a previous read or secure
+       storage of passport data.
+
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 4]
+Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
+
+
+
+   2.  Challenge Response - Respond to the ACME server with an object
+       contaning at least the SOD file, DG1 file, and DG2 file from
+       the eMTRD document, but it SHOULD send all DG objects that
+       is accessible (not requiring EAC) unless the user has configured
+       the ACME client to blacklist certain DG objects as specified in
+       "Privacy Considerations".
+
+   Example response to server:
+
+   POST /acme/chall/Rg5dV14Gh1Q
+   Host: example.com
+   Content-Type: application/jose+json
+
+   {
+     "protected": base64url({
+       "alg": "ES256",
+       "kid": "https://example.com/acme/acct/ExampleAccount",
+       "nonce": "SS2sSl1PtspvFZ08kNtzKd",
+       "url": "https://example.com/acme/chall/Rg5dV14Gh1Q"
+     }),
+     "payload": base64url({"sod": <Security Data Object, b64 encoded>,
+                           "dg1": <eMTRD DG1 file,  b64 encoded>,
+                           "dg2": <eMTRD DG2 file,  b64 encoded>,
+                           . . .,
+                           "dgx": <eMTRD DGx file,  b64 encoded>}),
+     "signature": "Q1bURgJoEslbD1c5...3pYdSMLio57mQNN4"
+   }
+
+3.3. Server Validation
+
+Upon receiving the challenge response, the server:
+   1.  Performs the standard JWS validation as defined in [RFC8555].
+
+
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 5]
+Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
+
+   2.  Computes the hashes of all DG objects the CA needs for
+       validation.
+
+   3.  Validates that these hashes match the corresponding hash values
+       contained within the SOD (Document Security Object).
+
+   4.  Validates that the digital signature of the SOD object matches
+       a valid Document Signer (DS) key.
+
+   5.  Validates that the Document Signer key chains up to a trusted
+       Country Signing Certification Authority (CSCA) root, as defined
+       by the CA's trust policy and applicable CA/Browser Forum Baseline
+       Requirements.
+
+   6.  (Optional) Validate that the eMRTD is not revoked by
+       consulting revocation lists for eMRTDs. However, not all
+       countries publish a revocation list for eMRTDs, why this
+       verification step MAY be skipped.
+
+   The validation succeeds only if all verifications pass AND all
+   mandatory objects required by the CA's policy are present in the
+   challenge response. The server MUST mark the challenge as invalid
+   if any step of the verification process fails.
+
+3.4.  Errors
+
+   The server SHOULD follow the guidelines set in [RFC8555], Section 6.7
+   for error conditions that occur during challenge validation.
+
+3.5.  Implementation Considerations
+
+   Its important to consider that this method does not actually
+   require the eMTRD document to be on the reader. If the owner
+   wishes to make use of the document, the owner can for example
+   copy the data to a file, or store it in a virtual NFC reader
+   The challenge method proves knowledge of the eMTRD data,
+   combined with binding to account URI for any biometric
+   authentication or other out-of-band verifications like
+   email, phone or mailed-letter verification to ensure
+   that the eMRTD data is not stolen.
+
+4.  Security Considerations
+
+   The same security considerations apply for the integrity of
+   authorizations ([RFC8555], Section 10.2).
+
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 6]
+Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
+
+   In terms of security, the security is maintained by the public key
+   infrastructure described in [ICAO Doc 9303].
+
+   Since the transmission of the sensitive PII data is done over
+   HTTPS, all security considerations have been tought out.
+
+5.  Privacy Considerations
+
+   The ACME client SHOULD provide a mechanism for the user to exclude
+   specific Data Groups (DGs) from the challenge response to protect
+   sensitive information not required for the specific certificate
+   profile.
+
+   For the other privacy considerations, its the CA's responsibility
+   to store and process the data in accordance with local laws, and
+   in a privacy-friendly way, in accordance with a privacy policy
+   enacted by the CA.
+
+6.  IANA Considerations
+
+6.1.  ACME Validation Method
+
+   The "ACME Validation Methods" registry is to be updated to include
+   the following entries:
+
+   label: emtrd-data-01
+   identifier-type: emrtd
+   ACME: Y
+   Reference: This document
+
+6.2. ACME Identifier Type
+
+   The "ACME Identifier Types" registry is to be updated to include
+   the following entries:
+
+   Label: emrtd
+   Identifier Type: Electronic Machine Readable Travel Document
+   Reference: [ICAO Doc 9303]
+
+7.  References
+
+7.1.  Normative References
+
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 7]
+Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
+
+
+   [RFC4648]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", RFC 4648, DOI 10.17487/RFC4648, October 2006,
+              <https://www.rfc-editor.org/rfc/rfc4648>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC8555]  Barnes, R., Hoffman-Andrews, J., McCarney, D., and J.
+              Kasten, "Automatic Certificate Management Environment
+              (ACME)", RFC 8555, DOI 10.17487/RFC8555, March 2019,
+              <https://www.rfc-editor.org/rfc/rfc8555>.
+
+   [ICAO Doc 9303]
+              International Civil Aviation Organization
+	      Machine Readable Travel Documents
+              Part1 .. through .. Part12
+              <https://www.icao.int/sites/default/files/publications
+              /DocSeries/9303_p1_cons_en.pdf>.
+
+Acknowledgments
+
+Authors' Addresses
+
+   Sebastian Robin Nielsen
+   Independent Contributor
+   Email: sebastian@sebbe.eu
