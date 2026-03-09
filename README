@@ -284,7 +284,7 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
    The "ACME Validation Methods" registry is to be updated to include
    the following entries:
 
-   label: emtrd-data-01
+   label: emrtd-data-01
    identifier-type: emrtd
    ACME: Y
    Reference: This document
