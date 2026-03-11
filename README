@@ -287,17 +287,17 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
    Without validating this trust chain, the authenticity of the eMRTD
    data cannot be established.
 
-   Implementations of the emrtd-data-01 ACME challenge therefore rely on
-   verification of the SOD signature and certificate chain as part of
-   server validation. Access to trusted CSCA certificates is required for
-   this process and is typically obtained through mechanisms such as
-   national trust stores or the Public Key Directory operated by the
-   International Civil Aviation Organization.
+   Implementations of the emrtd-data-01 ACME challenge therefore rely
+   on verification of the SOD signature and certificate chain as part
+   of server validation. Access to trusted CSCA certificates is
+   required for this process and is typically obtained through
+   mechanisms such as national trust stores or the Public Key
+   Directory operated by the International Civil Aviation Organization.
 
-   Revocation checking for eMRTDs MAY be performed where revocation lists
-   are available, although many issuing states do not publish revocation
-   information for travel documents. Germany is best in class, but
-   others not so much
+   Revocation checking for eMRTDs MAY be performed where revocation
+   lists are available, although many issuing states do not publish
+   revocation information for travel documents. Germany is best in
+   class, but others not so much
 
    It should also be noted that the protocol design allows previously
    read eMRTD data to be submitted, meaning the challenge proves
