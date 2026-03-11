@@ -80,14 +80,14 @@ Table of Contents
      3.3.  Server Validation . . . . . . . . . . . . . . . . . . . .   5
      3.4.  Errors  . . . . . . . . . . . . . . . . . . . . . . . . .   6
      3.5.  Implementation Considerations . . . . . . . . . . . . . .   6
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
-   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .   6
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
-     6.1.  ACME Validation Method  . . . . . . . . . . . . . . . . .   7
-     6.2.  ACME Identifier Type  . . . . . . . . . . . . . . . . . .   7
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .   7
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .   8
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
+     6.1.  ACME Validation Method  . . . . . . . . . . . . . . . . .   8
+     6.2.  ACME Identifier Type  . . . . . . . . . . . . . . . . . .   8
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .   8
 
 Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 2]
 Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
@@ -259,11 +259,56 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
 Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 6]
 Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
 
-   In terms of security, the security is maintained by the public key
-   infrastructure described in [ICAO Doc 9303].
+   MRZ/VIZ comparison and NFC reading alone provide limited security.
+   Reading the NFC chip and comparing its contents with the MRZ or VIZ
+   does not by itself prove that the document is genuine, since the data
+   could potentially be falsified if the certificate chain is not
+   verified.
+
+   In practice, access to the NFC chip of an electronic Machine Readable
+   Travel Document (eMRTD) requires performing Basic Access Control or
+   Password Authenticated Connection Establishment, which derive session
+   keys from data contained in the document's MRZ or from a Card Access
+   Number (CAN). This means that the MRZ or CAN must be obtained from
+   the physical document before the NFC chip can be accessed.
+
+   Authenticity verification of an eMRTD requires validation of the
+   digital signatures contained in the Logical Data Structure (LDS)
+   using the public key infrastructure defined in ICAO Doc 9303. In
+   particular, the Document Security Object MUST be validated to ensure
+   that:
+
+	1: The hashes of the submitted Data Group (DG) objects match
+	   those contained in the SOD.
+	2: The SOD carries a valid digital signature.
+    3: The signature chains through a Document Signer (DS) certificate
+       to a trusted Country Signing Certification Authority (CSCA).
+
+   Without validating this trust chain, the authenticity of the eMRTD
+   data cannot be established.
+
+   Implementations of the emrtd-data-01 ACME challenge therefore rely on
+   verification of the SOD signature and certificate chain as part of
+   server validation. Access to trusted CSCA certificates is required for
+   this process and is typically obtained through mechanisms such as
+   national trust stores or the Public Key Directory operated by the
+   International Civil Aviation Organization.
+
+   Revocation checking for eMRTDs MAY be performed where revocation lists
+   are available, although many issuing states do not publish revocation
+   information for travel documents. Germany is best in class, but
+   others not so much
+
+   It should also be noted that the protocol design allows previously
+   read eMRTD data to be submitted, meaning the challenge proves
+   knowledge of the eMRTD data but does not necessarily prove possession
+   of the physical document at the time of validation.
 
    Since the transmission of the sensitive PII data is done over
    HTTPS, all security considerations have been tought out.
+
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 7]
+Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
 
 5.  Privacy Considerations
 
@@ -282,6 +327,14 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
    to store any sensitive data to faciliate renewals other than the
    passport serial number, the user's full name, and the ACME
    account URI linked with biometric authentication.
+
+   Access to protected biometric data on eMRTDs (e.g., fingerprints
+   in DG3 or iris in DG4) requires Extended Access Control (EAC)
+   with authorized inspection system certificates as defined in
+   ICAO Doc 9303; therefore typical consumer NFC readers and ACME
+   clients will generally only be able to access BAC/PACE-protected
+   data groups other than DG3 or DG4. This means only face based
+   biometrics can be used.
 
 6.  IANA Considerations
 
@@ -314,7 +367,7 @@ Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
 
-Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 7]
+Sebastian Robin Nielsen    Expires XX XXX XX                    [Page 8]
 Internet-Draft             ACME-EMRTD-DATA-01                 March 2026
 
 
